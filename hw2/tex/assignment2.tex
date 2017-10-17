@@ -1,0 +1,206 @@
+
+\documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
+\usepackage{ctex}
+\usepackage{geometry}
+\usepackage{mathtools}
+\usepackage{xcolor}
+\usepackage{fancybox}
+\usepackage{amsfonts}
+\usepackage{listings}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage[justification=centering]{caption}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{url}
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+
+\usepackage{sectsty} % Allows customizing section commands
+\allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{	
+\normalfont \normalsize 
+\textsc{清华大学自动化系} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge 数字图像处理第二次作业 \\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{郑宇-自54-2015011454} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+
+\maketitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+\section{图像增强}
+{
+	\par \qquad 有如下暗光拍摄图像，请使用适当的方法处理该图像，增强图像的亮度。(图像文件 lena.jpg)
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width= 0.25\textwidth]{lena}
+		\caption{待处理图像}
+	\end{figure}
+
+	\subsection{编译环境}
+	\begin{itemize}
+		\item Windows10
+		\item VS2015
+		\item OpenCV2.4.13
+	\end{itemize}
+
+	\subsection{思路和原理}
+	{
+	\par \qquad 图像亮度和对比度调节公式如下:
+	\begin{equation}
+	{{dst}}(x,y) = \alpha  \times src(x,y) + \beta 
+	\end{equation}
+	\par \qquad 其中，$dst(x,y)$和$src(x,y)$分别表示目标图像和原图像指定坐标的像素值，$\alpha$控制对比度,$\beta$控制亮度。本程序中控制$\alpha=1$即可，只关注$\beta$的值。
+	\par \qquad 我的基本思路是，由于不能直接使用OpenCV的功能函数(在这里为Multiply，重载后的'$\times$'，和saturate$\_$cast)，因此我选择遍历图像矩阵，给每一个矩阵元素加上相同的值。并通过判断语句，控制求和得到的像素值在uchar(0$\sim$255)范围内。
+	\par \qquad 此外，为考虑用户交互性，我为程序增加了TrackBar控件，使得用户能在一定范围内调节亮度。
+	\subsection{代码摘要}
+	\begin{itemize}
+		\item 防止像素值溢出。
+	\begin{center}
+		\begin{lstlisting}[language={[ANSI]C++},
+		numbers=left,
+		numberstyle=\tiny,
+		basicstyle=\ttfamily\footnotesize,
+		stringstyle=\color{purple},
+		keywordstyle=\color{blue}\bfseries,
+		commentstyle=\color{olive},
+		directivestyle=\color{blue},
+		frame=shadowbox,
+		%framerule=0pt,
+		%backgroundcolor=\color{pink},
+		rulesepcolor=\color{red!20!green!20!blue!20}
+		%rulesepcolor=\color{brown}
+		%xleftmargin=0em,xrightmargin=0em,aboveskip=1em
+		]
+int Ideal = RawImg.at<uchar>(i, j) + CurrentBright;
+if (Ideal > 255)
+	RevisedImg.at<uchar>(i, j) = 255;
+else
+	RevisedImg.at<uchar>(i, j) = RawImg.at<uchar>(i, j) + CurrentBright;
+		\end{lstlisting}
+	\end{center}
+	\item 同时考虑单通道图和三通道图。
+	\begin{center}
+		\begin{lstlisting}[language={[ANSI]C++},
+		numbers=left,
+		numberstyle=\tiny,
+		basicstyle=\footnotesize\ttfamily,
+		stringstyle=\color{purple},
+		keywordstyle=\color{blue}\bfseries,
+		commentstyle=\color{olive},
+		directivestyle=\color{blue},
+		frame=shadowbox,
+		%framerule=0pt,
+		%backgroundcolor=\color{pink},
+		rulesepcolor=\color{red!20!green!20!blue!20}
+		%rulesepcolor=\color{brown}
+		%xleftmargin=0em,xrightmargin=0em,aboveskip=1em
+		]
+int channels = RawImg.channels();
+//Codes here
+if (channels == 1)
+{
+	//Codes here
+}
+else if (channels == 3)
+{
+	//Codes here
+}
+		\end{lstlisting}
+	\end{center}
+	\item TrackBar的添加
+	\begin{center}
+		\begin{lstlisting}[language={[ANSI]C++},
+		numbers=left,
+		numberstyle=\tiny,
+		basicstyle=\footnotesize\ttfamily,
+		stringstyle=\color{purple},
+		keywordstyle=\color{blue}\bfseries,
+		commentstyle=\color{olive},
+		directivestyle=\color{blue},
+		frame=shadowbox,
+		%framerule=0pt,
+		%backgroundcolor=\color{pink},
+		rulesepcolor=\color{red!20!green!20!blue!20}
+		%rulesepcolor=\color{brown}
+		%xleftmargin=0em,xrightmargin=0em,aboveskip=1em
+		]
+namedWindow("/*Name here*/", WINDOW_NORMAL);
+createTrackbar("/*Name here*/", 
+	"/*Name here*/", &CurrentBright, MaxBright, On_TrackBar_Changed);
+On_TrackBar_Changed(CurrentBright, 0);
+		\end{lstlisting}
+	\end{center}
+	\end{itemize}
+	}
+
+	\subsection{运行结果分析}
+	\par \qquad 程序中我为TrackBar设置的滑动范围为0至100，程序运行结果如下。
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{4.5cm}
+			\includegraphics[width=0.95\textwidth]{0.jpg}
+			\caption{原图}
+		\end{minipage}
+		\begin{minipage}{4.5cm}
+			\includegraphics[width=0.95\textwidth]{20.jpg}
+			\caption{亮度加20}
+		\end{minipage}
+	
+		\begin{minipage}{4.5cm}
+			\includegraphics[width=0.95\textwidth]{40.jpg}
+			\caption{亮度加40}
+		\end{minipage}	
+		\begin{minipage}{4.5cm}
+			\includegraphics[width=0.95\textwidth]{60.jpg}
+			\caption{亮度加60}
+		\end{minipage}
+	
+		\begin{minipage}{4.5cm}
+			\includegraphics[width=0.95\textwidth]{80.jpg}
+			\caption{亮度加80}
+		\end{minipage}
+		\begin{minipage}{4.5cm}
+			\includegraphics[width=0.95\textwidth]{100.jpg}
+			\caption{亮度加100}
+		\end{minipage}
+	\end{figure}
+	\par \qquad 可见梯度为20的亮度增量还是比较明显的。
+}
+
+\end{document}

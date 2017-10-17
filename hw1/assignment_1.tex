@@ -1,0 +1,117 @@
+
+\documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
+\usepackage{ctex}
+\usepackage{geometry}
+\usepackage{mathtools}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{url}
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+
+\usepackage{sectsty} % Allows customizing section commands
+\allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{	
+\normalfont \normalsize 
+\textsc{清华大学自动化系} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge 数字图像处理第一次作业 \\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{郑宇-自54-2015011454} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+
+\maketitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+\section{视觉检测系统设计}
+{
+	\par \qquad 一个纺织企业生产线上，棉花在一个宽度为，棉花在一个宽度为，棉花在一个宽度为 1.6m，高度为，高度为 8cm的扁平管道中以8m/s的速度运动，现在需要设计一个视觉检测系统自动棉花中的异物如头发、塑料丝、塑料丝、动物毛等、动物毛等）并利用高速气阀将其吹出。系统有如下基本要求。系统有如下基本要求：1.相机镜头距离传动带不超过 80cm；2.能检测宽度为2mm，长度为30mm的异物 ；3.采用2K（2048个传感器）或者4K线阵相机，相机的传感器大，相机的传感器大小为10微米或者14微米；4.气阀距相机位置不超过60cm。请确定系统的主要部件及相关参数：
+
+
+	\subsection{相机的选择}
+	\par \qquad 检测分辨率为2mm，传送带宽度为1.6m，因此至少需要的传感器的数量为
+	\begin{equation}
+	\frac{{1.6m}}{{2mm}} = 800
+	\end{equation}
+	\par \qquad 为方便检测出缺陷，可用多个像素容纳同一缺陷，因此传感器最好为最低值的3~4倍，故选择4K线阵相机。因此实际的检测精度变为
+	\begin{equation}
+	\frac{{1.6m}}{{4096}} = 3.91 \times {10^{ - 4}}m
+	\end{equation}
+	\par \qquad 因此所需相机频率为
+	\begin{equation}
+	\frac{{8m/s}}{{3.91 \times {{10}^{ - 4}}m}} = 20.48KHz
+	\end{equation}
+	\subsection{镜头的选择}
+	\par \qquad 相机传感器大小选择10$\mu$m时，成像尺寸为
+	\begin{equation}
+	10\mu m*4096 = 40.96mm
+	\end{equation}
+	\par \qquad 此时光学放大倍率为
+	\begin{equation}
+	\frac{{1600mm}}{{40.96mm}} = 39
+	\end{equation}
+	\par \qquad ，可采用M42X1、M42X1.5接口，14$\mu$m传感器放大倍数次之，可采用M58接口。
+	
+	\subsection{光源的选择}
+	\par \qquad 经过查阅，工业相机光源的选择标准主要有一下几条\cite{head}：
+	\begin{itemize}
+		\item 光源覆盖面积的大小;
+		\item 光源的照度指标;
+		\item 光源的功耗;
+		\item 光源但对周围环境的要求。
+	\end{itemize}
+	\par \qquad 本项目所在的生产线基本为dm量级，因此对照度、覆盖面积等指标无较大要求，因此主要考虑光源功耗和对周围环境的要求。而LED灯功耗低、抗干扰能力强，因此在资金较为充裕的情况下，优先考虑LED光源。
+	\par \qquad 此外，依据设备特点，工业检测所用光源还常常分为条形光源、环形光源、背光源、AOI专用光源、同轴光源等。其中，条形光源适用于较大方形结构物体检测，环形光源可突出物体的三维信息，背光源可突出物体的外部轮廓的特征，AOI专用光源主要用于电路板焊锡检测，同轴光源主要用于反射度较高的物体。根据以上描述可以采用的是环形光源或背光源。而背光源需要采用液晶显示器，环形光源则是高亮度、高密度的LED阵列，根据之前的描述，最终选择环形光源。
+	\subsection{方案评价}
+	\par \qquad 我认为我所选的方案缺点如下：
+	\begin{itemize}
+		\item 为能够稳定地检测到异物，我为相机的像素值设置了4倍的余量，而采用2K线阵相机仍有1.5倍的余量，这可能带来资源的浪费和成本的增加。
+		\item 紧承上一条，根据相似三角形关系，放大倍数和成像尺寸成反比，因此和像素数目成反比，故像素数目的余量牺牲了一定的放大比率。
+		\item 此外，LED的成本较其他工业光源而言更高，这对厂商压缩检测成本是不利的。
+	\end{itemize}
+	\par \qquad 而优点如下：
+	\begin{itemize}
+		\item 一切从实际需要出发。对参数的设计应当从项目的要点，即异物的精确检测进行考虑。为像素数目留足够的余量，这就大大降低了漏检率，而漏检率相比相机放大倍数而言显然是更为重要的一项指标。
+		\item 光源考虑周到。我最终所采取的环形光源既突出物体的三维特征，便于检测，又采用的是较为合适的LED技术，兼顾光源的稳定性、功耗性。
+	\end{itemize}
+}
+\renewcommand\contentsname{目录}
+\renewcommand\refname{参考文献}
+\bibliography{Ref}
+\bibliographystyle{unsrt}
+\end{document}
