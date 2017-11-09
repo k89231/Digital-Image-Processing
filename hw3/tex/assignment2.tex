@@ -1,0 +1,143 @@
+
+\documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
+\usepackage{ctex}
+\usepackage{geometry}
+\usepackage{mathtools}
+\usepackage{xcolor}
+\usepackage{fancybox}
+\usepackage{amsfonts}
+\usepackage{listings}
+\usepackage{times}
+\usepackage{amssymb}
+\usepackage[justification=centering]{caption}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{url}
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+
+\usepackage{sectsty} % Allows customizing section commands
+\allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{	
+\normalfont \normalsize 
+\textsc{清华大学自动化系} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge 数字图像处理第三次作业 \\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{郑宇-自54-2015011454} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+\begin{document}
+
+\maketitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%	PROBLEM 1
+%----------------------------------------------------------------------------------------
+
+\section{模糊图像运动方向估计}
+{
+	\par \qquad 使用Radon变换估计下图的运动模糊方向。
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width= 0.3\textwidth]{raw}
+		\caption{待处理图像}
+	\end{figure}
+
+	\subsection{编译环境}
+	\begin{itemize}
+		\item Windows10
+		\item VS2015
+		\item OpenCV2.4.13
+	\end{itemize}
+
+	\subsection{思路和原理}
+	{
+	\subsubsection{Radon变换}
+	\par \qquad Radon变换公式如下:
+	\begin{equation}
+	{R_f}(s,\theta ) = \int\limits_{ - \infty }^\infty  {f(x,y)\delta (s - x\cos \theta  - y\sin \theta )dxdy} 
+	\end{equation}
+	\par \qquad 式中的Dirac函数表明，二维Radon变换是对图像上满足以下式子的点$(x,y)$的积分。
+	\begin{equation}
+	s = x\cos \theta  + y\sin \theta
+	\end{equation}
+	\par \qquad 这说明Radon变换是对图像在某一方向的线积分。由解析几何的知识，s表示直线到原点的距离，$\theta$表征了直线的方向。故Radon变换结果为二维，其中一维表示角度，另一维表示距离。
+	\par \qquad \cite{radon1}的结果显示，运动模糊图像频谱图呈长条状，条纹与运动方向垂直；对频谱图沿条纹方向计算线积分，其中心位置的积分值最大。这也与我的试验结果相符。
+	\subsubsection{数据预处理}
+	\par \qquad 由于运动模糊主要体现在图像的边界，因此为突出运动信息，需将边界增强。为此我使用了卷积核kernal如下所示的拉普拉斯滤波。
+	\begin{equation}
+	kernal = \left( {\begin{array}{*{20}{c}}
+		{ - 1}&{ - 1}&{ - 1}\\
+		{ - 1}&9&{ - 1}\\
+		{ - 1}&{ - 1}&{ - 1}
+		\end{array}} \right)
+	\end{equation}
+	\par \qquad 在进行二维DFT，得到亮条纹后，为提高对比度以突出亮条纹，减小非条纹区域的亮点对判断的干扰，我对频谱图进行二值化处理。经过试验，我选择的二值化阈值为0.45(此时频谱已归一化)。
+	\subsection{运行结果和分析}
+	\par \qquad 可以看出，二值化的操作至关重要。Figure6为不经二值化，直接对频谱进行Radon变换的结果，而Figure4中亮纹周围的亮点在Figure6中形成了具有干扰性的亮斑。
+	\begin{figure}[H]
+		\centering
+		\begin{minipage}{4.5cm}
+			\includegraphics[width=0.95\textwidth]{raw}
+			\caption{原图I}
+		\end{minipage}
+		\begin{minipage}{4.5cm}
+			\includegraphics[width=0.95\textwidth]{laplacian}
+			\caption{拉普拉斯滤波$I_l$}
+		\end{minipage}		
+		\begin{minipage}{4.5cm}
+			\includegraphics[width=0.95\textwidth]{DFT}
+			\caption{$I_l$的频谱$F_l$}
+		\end{minipage}
+		
+		\begin{minipage}{4.5cm}
+			\includegraphics[width=0.95\textwidth]{DFT_Binary}
+			\caption{$F_l$二值化}
+		\end{minipage}		
+	
+		\begin{minipage}{4cm}
+			\includegraphics[width=0.95\textwidth]{Radon_Unbinary}
+			\caption{Radon变换结果(未二值化)}
+		\end{minipage}	
+		\begin{minipage}{4cm}
+			\includegraphics[width=0.95\textwidth]{Radon}
+			\caption{Radon变换结果(已二值化)}
+		\end{minipage}		
+	\end{figure}
+	\clearpage	
+	\par \qquad Radon变换结果的横轴表示角度(范围为0至180°)。使用鼠标点击和OpenCV的响应函数，测得亮斑中心对应的角度约为10至11度。故模糊方向为与水平成10至11度。
+}
+\renewcommand\contentsname{目录}
+\renewcommand\refname{参考文献}
+\bibliography{Ref}
+\bibliographystyle{unsrt}
+\end{document}
